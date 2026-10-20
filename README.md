@@ -1,4 +1,4 @@
-# WikiFace 🎭
+# WikiFaces 🎭
 
 🎭 Chrome extension that lets you read Wikipedia plot summaries with actor names or faces instead of character names. One click: Characters ↔ Actors ↔ Faces.
 
