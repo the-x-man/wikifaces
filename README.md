@@ -117,7 +117,7 @@ Contributions are welcome. These are the known gaps and planned improvements:
 
 ## Credits
 
-💡 **Original idea by [Kamal Gaur](IDEA_URL_HERE).** Thank you for spotting a small, everyday frustration that millions of readers share, and imagining a simple fix for it.
+💡 **Original idea by [Kamal Gaur](https://buildthisnext.online/p/wikipedias-plot-summaries-need-faces).** Thank you for spotting a small, everyday frustration that millions of readers share, and imagining a simple fix for it.
 
 Actor photos and article data come from [Wikipedia](https://www.wikipedia.org/) via the MediaWiki API. Images remain subject to their original licences on Wikimedia Commons.
 
