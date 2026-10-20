@@ -1,0 +1,397 @@
+/*
+ * WikiFace: content.css
+ * ----------------------
+ * Styles for the plot toggle, inline entity spans, avatar chips and the
+ * hover card. Colours come from Wikipedia's own Codex design tokens when the
+ * skin exposes them (Vector 2022, Minerva), with fallbacks for legacy skins,
+ * so light, dark ("night") and OS-automatic themes all match the page.
+ *
+ * Mode switching is pure CSS keyed off <html data-wikiface-mode="…">.
+ */
+
+/* ---------------------------------------------------------------------------
+ * Design tokens
+ * ------------------------------------------------------------------------- */
+:root {
+  --wf-bg: var(--background-color-base, #fff);
+  --wf-fg: var(--color-base, #202122);
+  --wf-subtle: var(--color-subtle, #54595d);
+  --wf-border: var(--border-color-base, #a2a9b1);
+  --wf-border-subtle: var(--border-color-subtle, #c8ccd1);
+  --wf-surface: var(--background-color-interactive-subtle, #f8f9fa);
+  --wf-surface-strong: var(--background-color-interactive, #eaecf0);
+  --wf-accent: var(--color-progressive, #36c);
+  --wf-focus: var(--border-color-progressive--focus, #36c);
+  --wf-shimmer-a: #eaecf0;
+  --wf-shimmer-b: #f8f9fa;
+  --wf-chip-l: 50%;
+  --wf-chip-a: 0.11;
+  --wf-shadow: 0 6px 24px rgba(0, 0, 0, 0.14), 0 1px 3px rgba(0, 0, 0, 0.1);
+  --wf-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Night mode fallbacks (used where the skin doesn't define Codex tokens). */
+html.skin-theme-clientpref-night {
+  --wf-bg: var(--background-color-base, #101418);
+  --wf-fg: var(--color-base, #eaecf0);
+  --wf-subtle: var(--color-subtle, #a2a9b1);
+  --wf-border: var(--border-color-base, #72777d);
+  --wf-border-subtle: var(--border-color-subtle, #54595d);
+  --wf-surface: var(--background-color-interactive-subtle, #202122);
+  --wf-surface-strong: var(--background-color-interactive, #27292d);
+  --wf-accent: var(--color-progressive, #88a3e8);
+  --wf-shimmer-a: #27292d;
+  --wf-shimmer-b: #3a3d42;
+  --wf-chip-l: 65%;
+  --wf-chip-a: 0.16;
+  --wf-shadow: 0 6px 24px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+  html.skin-theme-clientpref-os {
+    --wf-bg: var(--background-color-base, #101418);
+    --wf-fg: var(--color-base, #eaecf0);
+    --wf-subtle: var(--color-subtle, #a2a9b1);
+    --wf-border: var(--border-color-base, #72777d);
+    --wf-border-subtle: var(--border-color-subtle, #54595d);
+    --wf-surface: var(--background-color-interactive-subtle, #202122);
+    --wf-surface-strong: var(--background-color-interactive, #27292d);
+    --wf-accent: var(--color-progressive, #88a3e8);
+    --wf-shimmer-a: #27292d;
+    --wf-shimmer-b: #3a3d42;
+    --wf-chip-l: 65%;
+    --wf-chip-a: 0.16;
+    --wf-shadow: 0 6px 24px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Toggle bar
+ * ------------------------------------------------------------------------- */
+.wikiface-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  margin: 0.5em 0 0.9em;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  animation: wf-bar-in 0.3s var(--wf-ease) both;
+}
+
+.wikiface-toggle {
+  position: relative;
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--wf-border-subtle);
+  border-radius: 999px;
+  background: var(--wf-surface);
+  isolation: isolate;
+}
+
+/* Sliding "selected" pill behind the active segment. */
+.wikiface-toggle .wf-thumb {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 0;
+  width: 0;
+  border-radius: 999px;
+  background: var(--wf-bg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 0 0 1px var(--wf-border-subtle);
+  transition: transform 0.28s var(--wf-ease), width 0.28s var(--wf-ease);
+  z-index: 0;
+}
+
+.wikiface-toggle .wf-thumb.wf-no-anim {
+  transition: none;
+}
+
+.wikiface-toggle .wf-seg {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  margin: 0;
+  padding: 0.3em 0.9em;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--wf-subtle);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.wikiface-toggle .wf-seg:hover {
+  color: var(--wf-fg);
+}
+
+.wikiface-toggle .wf-seg[aria-checked="true"] {
+  color: var(--wf-fg);
+  font-weight: 600;
+}
+
+.wikiface-toggle .wf-seg:focus-visible {
+  outline: 2px solid var(--wf-focus);
+  outline-offset: 1px;
+}
+
+.wikiface-toggle .wf-seg-icon {
+  font-size: 0.95em;
+  line-height: 1;
+}
+
+/* Subtle progress line under the toggle while thumbnails are loading. */
+.wikiface-toggle[aria-busy="true"]::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--wf-accent), transparent);
+  background-size: 200% 100%;
+  animation: wf-shimmer 1.1s linear infinite;
+}
+
+.wikiface-bar .wf-meta {
+  color: var(--wf-subtle);
+  font-size: 0.8125rem;
+}
+
+/* ---------------------------------------------------------------------------
+ * Entity spans
+ * ------------------------------------------------------------------------- */
+.wikiface-entity {
+  text-decoration: underline dotted;
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  border-radius: 999px;
+  cursor: help;
+}
+
+/* Inside links, keep Wikipedia's own link styling in charge. */
+a .wikiface-entity {
+  text-decoration: none;
+  cursor: inherit;
+}
+
+/* Default (Characters): only the original text is visible.
+   (Specificity is kept above the .wf-avatar state rules on purpose.) */
+.wikiface-entity .wf-text-actor,
+.wikiface-entity > .wf-avatar.wf-avatar {
+  display: none;
+}
+
+/* Actors mode */
+html[data-wikiface-mode="actors"] .wikiface-entity .wf-text-char {
+  display: none;
+}
+
+html[data-wikiface-mode="actors"] .wikiface-entity .wf-text-actor {
+  display: inline;
+  animation: wf-text-in 0.25s var(--wf-ease);
+}
+
+/* Faces mode: avatar chip + original name, tinted per character. */
+html[data-wikiface-mode="faces"] .wikiface-entity {
+  padding: 0 0.3em 0 2px;
+  background: hsl(var(--wf-hue, 210) 70% var(--wf-chip-l) / var(--wf-chip-a));
+  text-decoration: none;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+html[data-wikiface-mode="faces"] .wikiface-entity > .wf-avatar.wf-avatar {
+  display: inline-block;
+  margin-right: 0.25em;
+  animation: wf-pop-in 0.3s var(--wf-ease);
+}
+
+html[data-wikiface-mode="characters"] .wikiface-entity .wf-text-char,
+html[data-wikiface-mode="faces"] .wikiface-entity .wf-text-char {
+  animation: wf-text-in 0.25s var(--wf-ease);
+}
+
+/* ---------------------------------------------------------------------------
+ * Avatars
+ * ------------------------------------------------------------------------- */
+.wf-avatar {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border-radius: 50%;
+  overflow: hidden;
+  vertical-align: -5px;
+  background: hsl(var(--wf-hue, 210) 38% 46%);
+  box-shadow: 0 0 0 1.5px var(--wf-bg), 0 0 0 2.5px hsl(var(--wf-hue, 210) 55% 55% / 0.55);
+}
+
+.wf-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 20%; /* headshots: keep the face, not the chest */
+  animation: wf-text-in 0.3s ease;
+}
+
+.wf-avatar.wf-initials {
+  text-align: center;
+  line-height: 20px;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+}
+
+.wf-avatar.wf-loading {
+  background: linear-gradient(90deg, var(--wf-shimmer-a) 0%, var(--wf-shimmer-b) 50%, var(--wf-shimmer-a) 100%);
+  background-size: 200% 100%;
+  animation: wf-shimmer 1.2s linear infinite;
+}
+
+.wf-avatar.wf-avatar-lg {
+  display: inline-flex;
+  width: 52px;
+  height: 52px;
+  vertical-align: middle;
+  box-shadow: 0 0 0 2px var(--wf-bg), 0 0 0 3.5px hsl(var(--wf-hue, 210) 55% 55% / 0.6);
+}
+
+.wf-avatar.wf-avatar-lg.wf-initials {
+  font-size: 18px;
+  line-height: 52px;
+  justify-content: center;
+}
+
+/* ---------------------------------------------------------------------------
+ * Tooltip card
+ * ------------------------------------------------------------------------- */
+.wikiface-tooltip {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 280px;
+  padding: 10px 14px 10px 10px;
+  border: 1px solid var(--wf-border-subtle);
+  border-radius: 10px;
+  background: var(--wf-bg);
+  color: var(--wf-fg);
+  box-shadow: var(--wf-shadow);
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.35;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px) scale(0.98);
+  transition: opacity 0.15s ease, transform 0.18s var(--wf-ease);
+}
+
+.wikiface-tooltip[data-placement="below"] {
+  transform: translateY(-4px) scale(0.98);
+}
+
+.wikiface-tooltip.wf-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.wikiface-tooltip[hidden] {
+  display: none;
+}
+
+.wikiface-tooltip .wf-tip-avatar-slot {
+  display: inline-flex;
+  flex: none;
+  padding: 3px;
+}
+
+.wikiface-tooltip .wf-tip-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.wikiface-tooltip .wf-tip-actor {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.wikiface-tooltip .wf-tip-as {
+  color: var(--wf-subtle);
+}
+
+.wikiface-tooltip .wf-tip-as strong {
+  color: var(--wf-fg);
+  font-weight: 600;
+}
+
+.wikiface-tooltip .wf-tip-alt {
+  margin-top: 2px;
+  color: var(--wf-subtle);
+  font-size: 0.75rem;
+}
+
+.wikiface-tooltip .wf-tip-alt[hidden] {
+  display: none;
+}
+
+/* ---------------------------------------------------------------------------
+ * Animations
+ * ------------------------------------------------------------------------- */
+@keyframes wf-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+@keyframes wf-text-in {
+  from { opacity: 0.25; }
+  to { opacity: 1; }
+}
+
+@keyframes wf-pop-in {
+  from { opacity: 0; transform: scale(0.6); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes wf-bar-in {
+  from { opacity: 0; transform: translateY(-3px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wikiface-bar,
+  .wikiface-toggle .wf-thumb,
+  .wikiface-entity *,
+  .wikiface-tooltip,
+  .wf-avatar,
+  .wf-avatar img {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Small screens / print
+ * ------------------------------------------------------------------------- */
+@media (max-width: 420px) {
+  .wikiface-bar .wf-meta { display: none; }
+  .wikiface-toggle .wf-seg { padding: 0.3em 0.65em; }
+}
+
+@media print {
+  .wikiface-bar,
+  .wikiface-tooltip { display: none !important; }
+}
